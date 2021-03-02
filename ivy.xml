@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ivy-module version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+
+	<info organisation="havis/middleware/reader/rf-r" module="rf-r-readerconnector" default="true" />
+
+	<configurations>
+		<conf name="default" />
+	</configurations>
+
+	<dependencies>
+		<dependency org="de/feig" name="obid" rev="${obid.version}" conf="default" />
+		<dependency org="de/feig" name="obid-${platform}" rev="${obid.version}" conf="default" />
+		<dependency org="havis/util" name="monitor" rev="${havis.version}" conf="default" />
+		<dependency org="havis/middleware" name="ale-api" rev="${havis.version}" conf="default" />
+		<dependency org="havis/middleware" name="utils" rev="${havis.version}" conf="default" />
+		<dependency org="org/jmockit" name="jmockit" rev="${jmockit.version}" conf="default" />
+		<dependency org="org/jmockit" name="jmockit-coverage" rev="${jmockit.version}" conf="default" />
+		<dependency org="junit" name="junit" rev="${junit.version}" conf="default" />
+		<dependency org="org/osgi" name="org.osgi.core" rev="${osgi.version}" conf="default" />
+	</dependencies>
+
+</ivy-module>

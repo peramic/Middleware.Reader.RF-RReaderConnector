@@ -1,0 +1,30 @@
+Bundle-Name: Ha-VIS Middleware RF-R Reader Connector
+Bundle-SymbolicName: havis.middleware.reader.rf-r-readerconnector
+Bundle-Version: 2.6.4
+Implementation-Version: 2.6
+Bundle-ManifestVersion: 2
+Bundle-Vendor: HARTING IT_SD
+Havis-Bundle: 
+ /OSGI-INF/havis.middleware.reader.rf-r-readerconnector.properties
+Bundle-Activator: havis.middleware.reader.rf_r.osgi.Activator
+Import-Package: 
+ de.feig,
+ de.feig.TagHandler,
+ de.feig.FEDM.Core,
+ de.feig.FEDM.Core.Utility,
+ havis.middleware.ale.base,
+ havis.middleware.ale.base.exception,
+ havis.middleware.ale.base.message,
+ havis.middleware.ale.base.operation.port,
+ havis.middleware.ale.base.operation.port.result,
+ havis.middleware.ale.base.operation.tag,
+ havis.middleware.ale.base.operation.tag.result,
+ havis.middleware.ale.exit,
+ havis.middleware.ale.reader,
+ havis.middleware.ale.service.rc,
+ havis.middleware.utils.data,
+ havis.middleware.utils.threading,
+ havis.util.monitor,
+ org.osgi;resolution:=optional,
+ org.osgi.framework;resolution:=optional,
+ org.osgi.util.tracker;resolution:=optional
