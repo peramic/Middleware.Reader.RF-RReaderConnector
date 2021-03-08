@@ -291,9 +291,12 @@ public abstract class NotificationRF_RReaderConnector extends RF_RReaderConnecto
 								if (antennaErrorCount == 0)
 									notifyAntennaErrorResolved();
 							}
+						} catch (Exception e) {
+							clientCallback.notify(new Message(Exits.Reader.Controller.Error, "Exception occurred during status check: " + e.toString(), e));
 						} finally {
 							readerLock.unlock();
 						}
+
 					}
 				}, 2, 2, TimeUnit.SECONDS);
 				try {
