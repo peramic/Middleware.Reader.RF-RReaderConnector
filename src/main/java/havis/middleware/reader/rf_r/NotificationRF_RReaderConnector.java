@@ -16,16 +16,12 @@ import havis.middleware.ale.reader.Callback;
 import havis.middleware.ale.reader.Property;
 import havis.middleware.reader.rf_r.RF_RConfiguration.OperatingModeValue;
 import havis.middleware.utils.data.Calculator;
-import havis.middleware.utils.threading.NamedThreadFactory;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.feig.FeHexConvert;
@@ -50,8 +46,6 @@ public abstract class NotificationRF_RReaderConnector extends RF_RReaderConnecto
 	private byte lastAntennas = 0;
 	
 	private AtomicBoolean firstInventory = new AtomicBoolean(true);
-
-	protected ScheduledExecutorService statusService;
 
 	/**
 	 * Initializes a new instance of the
@@ -263,42 +257,6 @@ public abstract class NotificationRF_RReaderConnector extends RF_RReaderConnecto
 		try {
 			if (!inventoryStarted) {
 				inventoryStarted = true;
-				statusService = Executors.newScheduledThreadPool(1,
-						new NamedThreadFactory(this.getClass().getSimpleName() + " " + (this.devCaps.getName() != null ? this.devCaps.getName() : "[no name]") + " reader status"));
-				statusService.scheduleWithFixedDelay(new Runnable() {
-					@Override
-					public void run() {
-						readerLock.lock();
-						try {
-							RF_RStatus state = RF_RStatus.forValue(reader.getLastStatus());
-							if (state == RF_RStatus.Firmware_activation_required)
-								logIsoError("An ISO tag is located in the reader field, firmware activation is needed!");
-							else if (state == RF_RStatus.RF_Warning)
-								logAntennaError("An antenna is not connected correctly to the reader please check all antenna cables!");
-							else if (state == RF_RStatus.Parameter_Range_Error)
-								logParameterRangeError("The property '" + RF_RProperties.PropertyName.InventoryAntennas + "' was invalid specified!");
-							else if (state == RF_RStatus.OK || state == RF_RStatus.No_Transponder) {
-								if (isoErrorCount > 0)
-									isoErrorCount--;
-								if (antennaErrorCount > 0)
-									antennaErrorCount--;
-								parameterRangeErrorOccurred = false;
-								readerErrorOccurred = false;
-
-								if (isoErrorCount == 0)
-									notifyIsoErrorResolved();
-
-								if (antennaErrorCount == 0)
-									notifyAntennaErrorResolved();
-							}
-						} catch (Exception e) {
-							clientCallback.notify(new Message(Exits.Reader.Controller.Error, "Exception occurred during status check: " + e.toString(), e));
-						} finally {
-							readerLock.unlock();
-						}
-
-					}
-				}, 2, 2, TimeUnit.SECONDS);
 				try {
 					// configure multiplexer
 					if (this.antennas != this.lastAntennas) {
@@ -390,7 +348,6 @@ public abstract class NotificationRF_RReaderConnector extends RF_RReaderConnecto
 		try {
 			if (inventoryStarted) {
 				inventoryStarted = false;
-				statusService.shutdownNow();
 				try {
 					reader.setData(FedmIscReaderID.FEDM_ISC_TMP_RF_ONOFF, (byte) 0x00);
 					reader.sendProtocol((byte) 0x6A);
