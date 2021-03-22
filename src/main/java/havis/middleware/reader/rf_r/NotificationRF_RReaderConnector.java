@@ -125,6 +125,11 @@ public abstract class NotificationRF_RReaderConnector extends RF_RReaderConnecto
 		properties.put(de.feig.ReaderConfig.OperatingMode.NotificationMode.Transmission.Destination.IPv4.IPAddress,
 				getLocalAddress(originalProperties.get(Property.Connector.Host), originalProperties.get(Property.Connector.Port)).getAddress());
 		properties.put(de.feig.ReaderConfig.OperatingMode.NotificationMode.Transmission.Destination.PortNumber, Integer.valueOf(this.port));
+
+		// enable reader keep alive to get diagnostic messages
+		properties.put(de.feig.ReaderConfig.OperatingMode.NotificationMode.Transmission.KeepAlive.Enable, (byte) 1);
+		properties.put(de.feig.ReaderConfig.OperatingMode.NotificationMode.Transmission.KeepAlive.IntervalTime, Integer.valueOf(2));
+
 		if (properties.get(de.feig.ReaderConfig.OperatingMode.NotificationMode.Filter.TransponderValidTime) == null) {
 			int readerCycleDuration = Math.max(0, this.clientCallback.getReaderCycleDuration());
 			properties.put(de.feig.ReaderConfig.OperatingMode.NotificationMode.Filter.TransponderValidTime, readerCycleDuration / 100);
@@ -620,8 +625,23 @@ public abstract class NotificationRF_RReaderConnector extends RF_RReaderConnecto
 		 * @param portNr
 		 */
 		@Override
-		public void onNewReaderDiagnostic(int error, String ip, int portNr) {
-			// nothing to do
+		public void onNewReaderDiagnostic(int error, String remoteIP, int portNr) {
+			if (!readerConnection.getHost().equals(remoteIP) || port != portNr) {
+				// ignore
+				return;
+			}
+			
+			// TODO: interpret error here
+			if (error != 0) {
+				clientCallback.notify(new Message(Exits.Reader.Controller.Error, "Diagnostic: " + error));
+				try {
+					RF_RStatus state = RF_RStatus.forValue(error);
+					clientCallback.notify(new Message(Exits.Reader.Controller.Error, "Diagnostic parsed: " + state.toString()));
+				}
+				catch (Exception e) {
+					clientCallback.notify(new Message(Exits.Reader.Controller.Error, "Diagnostic failed to parse!"));
+				}
+			}
 		}
 
 		/**
